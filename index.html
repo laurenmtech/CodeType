@@ -17,6 +17,7 @@
             <button class="section-btn active" data-section="os">Operating Systems</button>
             <button class="section-btn" data-section="algorithms">Algorithms</button>
             <button class="section-btn" data-section="datastructures">Data Structures</button>
+            <button class="section-btn" data-section="computertheory">Computer Theory</button>
             <button class="section-btn" data-section="java">Java</button>
             <button class="section-btn" data-section="c">C</button>
             <button class="section-btn" data-section="cpp">C++</button>
@@ -24,16 +25,8 @@
 
         <div class="stats-bar">
             <div class="stat">
-                <span class="stat-label">WPM</span>
-                <span class="stat-value" id="wpm">0</span>
-            </div>
-            <div class="stat">
-                <span class="stat-label">Accuracy</span>
-                <span class="stat-value" id="accuracy">100%</span>
-            </div>
-            <div class="stat">
-                <span class="stat-label">Progress</span>
-                <span class="stat-value" id="progress">0/0</span>
+                <span class="stat-label">Mastered</span>
+                <span class="stat-value" id="mastered">0/0</span>
             </div>
             <div class="stat">
                 <span class="stat-label">Time</span>
@@ -59,6 +52,7 @@
         </div>
 
         <div class="controls">
+            <button id="reviewBtn" class="control-btn review-btn">📝 Review (0)</button>
             <button id="hintBtn" class="control-btn hint-btn">💡 Hint</button>
             <button id="newTextBtn" class="control-btn">New Prompt</button>
             <button id="resetBtn" class="control-btn">Reset</button>
@@ -67,14 +61,6 @@
         <div class="results" id="results" style="display: none;">
             <h2>Practice Complete!</h2>
             <div class="result-stats">
-                <div class="result-item">
-                    <div class="result-label">Words Per Minute</div>
-                    <div class="result-value" id="finalWpm">0</div>
-                </div>
-                <div class="result-item">
-                    <div class="result-label">Accuracy</div>
-                    <div class="result-value" id="finalAccuracy">0%</div>
-                </div>
                 <div class="result-item">
                     <div class="result-label">Time Taken</div>
                     <div class="result-value" id="finalTime">0s</div>

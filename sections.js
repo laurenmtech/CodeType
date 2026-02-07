@@ -269,5 +269,75 @@ const sections = {
                 answers: ["[]", "&"]
             }
         ]
+    },
+    computertheory: {
+        name: "Computer Theory",
+        prompts: [
+            {
+                topic: "Deterministic Finite Automata",
+                text: "A DFA consists of a finite set of ___, a start state, a set of ___ states, and a transition function that maps each state-symbol pair to exactly one state.",
+                answers: ["states", "accept"]
+            },
+            {
+                topic: "DFA Properties",
+                text: "In a DFA, for every state and every input symbol, there is exactly ___ transition. A string is accepted if it ends in an ___ state.",
+                answers: ["one", "accepting"]
+            },
+            {
+                topic: "Regular Operations",
+                text: "The three regular operations are union, ___, and ___. These operations are closed under regular languages.",
+                answers: ["concatenation", "star"]
+            },
+            {
+                topic: "Regular Operations Closure",
+                text: "If A and B are regular languages, then A ∪ B, A ∘ B, and A* are also ___. The ___ operation repeats a language zero or more times.",
+                answers: ["regular", "star"]
+            },
+            {
+                topic: "Nondeterministic Finite Automata",
+                text: "Unlike DFAs, NFAs can have ___ or more transitions for the same state and symbol, and can include ___ transitions.",
+                answers: ["zero", "epsilon"]
+            },
+            {
+                topic: "NFA vs DFA",
+                text: "Every NFA can be converted to an equivalent ___. An epsilon transition allows state changes without ___ input.",
+                answers: ["DFA", "consuming"]
+            },
+            {
+                topic: "Closure Under Regular Languages",
+                text: "Regular languages are closed under union, intersection, ___, concatenation, and ___.",
+                answers: ["complement", "star"]
+            },
+            {
+                topic: "Regular Language Closure",
+                text: "The ___ of two regular languages is regular. Regular languages are also closed under ___ difference.",
+                answers: ["intersection", "set"]
+            },
+            {
+                topic: "Reduce(M) Algorithm",
+                text: "The Reduce(M) algorithm minimizes a DFA by merging ___ states. It uses a table to mark pairs of ___ states.",
+                answers: ["equivalent", "distinguishable"]
+            },
+            {
+                topic: "DFA Minimization",
+                text: "Reduce(M) first removes ___ states, then partitions remaining states into equivalence classes based on ___ behavior.",
+                answers: ["unreachable", "indistinguishable"]
+            },
+            {
+                topic: "Pumping Lemma",
+                text: "The pumping lemma states that for any regular language L, there exists a pumping length ___ such that any string s in L with |s| ≥ p can be divided into three parts ___.",
+                answers: ["p", "xyz"]
+            },
+            {
+                topic: "Pumping Lemma Conditions",
+                text: "For the division xyz, |y| > ___, |xy| ≤ p, and xy^i z must be in L for all i ≥ ___.",
+                answers: ["0", "0"]
+            },
+            {
+                topic: "Pumping Lemma Application",
+                text: "The pumping lemma is used to prove that languages are ___ regular. For example, {0^n 1^n | n ≥ 0} is ___ regular.",
+                answers: ["not", "not"]
+            }
+        ]
     }
 };

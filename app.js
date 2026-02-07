@@ -12,7 +12,13 @@ let state = {
     answers: [],
     hintsUsed: 0,
     currentHintLevel: 0,
-    isProcessing: false
+    isProcessing: false,
+    reviewQueue: [],
+    isReviewMode: false,
+    currentPromptHadErrors: false,
+    currentPromptUsedHints: false,
+    completedPrompts: new Set(),
+    masteredPrompts: new Set()
 };
 
 // DOM elements
@@ -20,15 +26,14 @@ const sectionButtons = document.querySelectorAll('.section-btn');
 const textDisplay = document.getElementById('textDisplay');
 const typingInput = document.getElementById('typingInput');
 const topicTitle = document.getElementById('topicTitle');
-const wpmDisplay = document.getElementById('wpm');
-const accuracyDisplay = document.getElementById('accuracy');
-const progressDisplay = document.getElementById('progress');
 const timerDisplay = document.getElementById('timer');
+const masteredDisplay = document.getElementById('mastered');
 const newTextBtn = document.getElementById('newTextBtn');
 const resetBtn = document.getElementById('resetBtn');
 const resultsModal = document.getElementById('results');
 const tryAgainBtn = document.getElementById('tryAgainBtn');
 const hintBtn = document.getElementById('hintBtn');
+const reviewBtn = document.getElementById('reviewBtn');
 
 // Initialize
 function init() {
@@ -52,6 +57,7 @@ function setupEventListeners() {
     newTextBtn.addEventListener('click', loadNewPrompt);
     resetBtn.addEventListener('click', resetPractice);
     hintBtn.addEventListener('click', showHint);
+    reviewBtn.addEventListener('click', startReviewMode);
     tryAgainBtn.addEventListener('click', () => {
         resultsModal.style.display = 'none';
         resetPractice();
@@ -63,10 +69,16 @@ function setupEventListeners() {
 function changeSection(section) {
     state.currentSection = section;
     state.currentPromptIndex = 0;
+    state.reviewQueue = [];
+    state.isReviewMode = false;
+    state.completedPrompts = new Set();
+    state.masteredPrompts = new Set();
     
     sectionButtons.forEach(btn => btn.classList.remove('active'));
     document.querySelector(`[data-section="${section}"]`).classList.add('active');
     
+    updateReviewButton();
+    updateMasteredDisplay();
     resetPractice();
 }
 
@@ -89,11 +101,25 @@ function loadPrompt() {
         
         console.log('Section:', section.name, 'Topic:', prompt.topic);
         
-        topicTitle.textContent = `${section.name} - ${prompt.topic}`;
+        // Add status indicator to topic title
+        let statusIndicator = '';
+        if (state.masteredPrompts.has(state.currentPromptIndex)) {
+            statusIndicator = ' ✓';
+        } else if (state.reviewQueue.includes(state.currentPromptIndex)) {
+            statusIndicator = ' 📝';
+        } else if (state.completedPrompts.has(state.currentPromptIndex)) {
+            statusIndicator = ' •';
+        }
+        
+        const modeIndicator = state.isReviewMode ? ' [REVIEW MODE]' : '';
+        
+        topicTitle.textContent = `${section.name} - ${prompt.topic}${statusIndicator}${modeIndicator}`;
         
         state.answers = prompt.answers;
         state.totalBlanks = prompt.answers.length;
         state.currentBlankIndex = 0;
+        state.currentPromptHadErrors = false;
+        state.currentPromptUsedHints = false;
         
         // Split text by ___ to create display with blanks
         const parts = prompt.text.split('___');
@@ -121,7 +147,6 @@ function loadPrompt() {
         
         state.isComplete = false;
         state.currentHintLevel = 0;
-        updateProgress();
         updateHintButton();
         console.log('Prompt loaded successfully');
     } catch (error) {
@@ -133,7 +158,22 @@ function loadPrompt() {
 // Load new prompt
 function loadNewPrompt() {
     const section = sections[state.currentSection];
-    state.currentPromptIndex = (state.currentPromptIndex + 1) % section.prompts.length;
+    
+    if (state.isReviewMode && state.reviewQueue.length > 0) {
+        // In review mode, cycle through review queue
+        const currentReviewIndex = state.reviewQueue.indexOf(state.currentPromptIndex);
+        const nextReviewIndex = (currentReviewIndex + 1) % state.reviewQueue.length;
+        state.currentPromptIndex = state.reviewQueue[nextReviewIndex];
+    } else if (state.isReviewMode) {
+        // No more items to review, exit review mode
+        state.isReviewMode = false;
+        updateReviewButton();
+        state.currentPromptIndex = (state.currentPromptIndex + 1) % section.prompts.length;
+    } else {
+        // Normal mode - cycle through all prompts
+        state.currentPromptIndex = (state.currentPromptIndex + 1) % section.prompts.length;
+    }
+    
     resetPractice();
 }
 
@@ -172,8 +212,6 @@ function handleTyping(e) {
         currentBlank.classList.remove('correct-preview');
         currentBlank.classList.add('incorrect');
     }
-    
-    updateStats();
 }
 
 // Handle key press
@@ -206,6 +244,7 @@ function checkAndMoveNext(inputValue) {
         currentBlank.textContent = correctAnswer;
     } else {
         state.errors++;
+        state.currentPromptHadErrors = true;
         currentBlank.classList.remove('current', 'correct-preview');
         currentBlank.classList.add('incorrect');
         currentBlank.textContent = inputValue + ' ✗ (' + correctAnswer + ')';
@@ -221,10 +260,8 @@ function checkAndMoveNext(inputValue) {
     } else {
         // Highlight next blank
         blanks[state.currentBlankIndex].classList.add('current');
-        updateStats();
     }
     
-    updateProgress();
     updateHintButton();
 }
 
@@ -236,28 +273,6 @@ function startTimer() {
     }, 100);
 }
 
-// Update statistics
-function updateStats() {
-    if (!state.startTime) return;
-    
-    const elapsedMinutes = (Date.now() - state.startTime) / 60000;
-    const blanksCompleted = state.currentBlankIndex + (typingInput.value.trim().length > 0 ? 0.5 : 0);
-    const wpm = blanksCompleted > 0 ? Math.round((blanksCompleted * 2) / elapsedMinutes) : 0;
-    
-    const attempted = state.currentBlankIndex;
-    const accuracy = attempted > 0 
-        ? Math.round((state.correctAnswers / attempted) * 100) 
-        : 100;
-    
-    wpmDisplay.textContent = wpm;
-    accuracyDisplay.textContent = `${accuracy}%`;
-}
-
-// Update progress
-function updateProgress() {
-    progressDisplay.textContent = `${state.currentBlankIndex}/${state.totalBlanks}`;
-}
-
 // Show hint
 function showHint() {
     if (state.isComplete) return;
@@ -267,6 +282,7 @@ function showHint() {
     
     state.currentHintLevel++;
     state.hintsUsed++;
+    state.currentPromptUsedHints = true;
     
     let hint = '';
     
@@ -328,13 +344,33 @@ function completeSession() {
     state.isComplete = true;
     clearInterval(state.timerInterval);
     
-    const elapsedMinutes = (Date.now() - state.startTime) / 60000;
+    // Track prompt performance
+    const promptKey = `${state.currentSection}-${state.currentPromptIndex}`;
+    state.completedPrompts.add(state.currentPromptIndex);
+    
+    // Add to review queue if had errors or used hints
+    if (state.currentPromptHadErrors || state.currentPromptUsedHints) {
+        if (!state.reviewQueue.includes(state.currentPromptIndex)) {
+            state.reviewQueue.push(state.currentPromptIndex);
+        }
+    } else {
+        // Mastered this prompt
+        state.masteredPrompts.add(state.currentPromptIndex);
+        // Remove from review queue if it was there
+        const index = state.reviewQueue.indexOf(state.currentPromptIndex);
+        if (index > -1) {
+            state.reviewQueue.splice(index, 1);
+        }
+    }
+    
     const elapsedSeconds = Math.floor((Date.now() - state.startTime) / 1000);
-    const wpm = Math.round((state.totalBlanks * 2) / elapsedMinutes);
-    const accuracy = Math.round((state.correctAnswers / state.totalBlanks) * 100);
     
     // Show quick stats notification
-    showQuickStats(wpm, accuracy, elapsedSeconds, state.errors, state.hintsUsed);
+    const needsReview = state.currentPromptHadErrors || state.currentPromptUsedHints;
+    showQuickStats(elapsedSeconds, state.errors, state.hintsUsed, needsReview);
+    
+    updateReviewButton();
+    updateMasteredDisplay();
     
     // Auto-advance to next prompt after a short delay
     setTimeout(() => {
@@ -343,7 +379,7 @@ function completeSession() {
 }
 
 // Show quick stats notification
-function showQuickStats(wpm, accuracy, time, errors, hints) {
+function showQuickStats(time, errors, hints, needsReview) {
     let statsNotification = document.getElementById('statsNotification');
     if (!statsNotification) {
         statsNotification = document.createElement('div');
@@ -352,12 +388,13 @@ function showQuickStats(wpm, accuracy, time, errors, hints) {
         document.querySelector('.container').appendChild(statsNotification);
     }
     
+    const statusIcon = needsReview ? '📝' : '✅';
+    const statusText = needsReview ? 'Needs Review' : 'Mastered!';
+    
     statsNotification.innerHTML = `
         <div class="stats-notification-content">
-            <h3>✅ Complete!</h3>
+            <h3>${statusIcon} ${statusText}</h3>
             <div class="quick-stats">
-                <span><strong>${wpm}</strong> WPM</span>
-                <span><strong>${accuracy}%</strong> Accuracy</span>
                 <span><strong>${time}s</strong> Time</span>
                 ${errors > 0 ? `<span><strong>${errors}</strong> Errors</span>` : ''}
                 ${hints > 0 ? `<span><strong>${hints}</strong> Hints</span>` : ''}
@@ -387,17 +424,73 @@ function resetPractice() {
     state.hintsUsed = 0;
     state.currentHintLevel = 0;
     state.isProcessing = false;
+    state.currentPromptHadErrors = false;
+    state.currentPromptUsedHints = false;
     
     typingInput.value = '';
     typingInput.disabled = false;
     
-    wpmDisplay.textContent = '0';
-    accuracyDisplay.textContent = '100%';
     timerDisplay.textContent = '0s';
-    progressDisplay.textContent = '0/0';
     
     loadPrompt();
     typingInput.focus();
+}
+
+// Start review mode
+function startReviewMode() {
+    if (state.reviewQueue.length === 0) {
+        alert('No items to review! Great job!');
+        return;
+    }
+    
+    state.isReviewMode = true;
+    state.currentPromptIndex = state.reviewQueue[0];
+    updateReviewButton();
+    resetPractice();
+}
+
+// Update review button
+function updateReviewButton() {
+    if (!reviewBtn) return;
+    
+    const reviewCount = state.reviewQueue.length;
+    
+    if (state.isReviewMode) {
+        reviewBtn.textContent = `📝 Reviewing (${reviewCount})`;
+        reviewBtn.classList.add('active-review');
+    } else if (reviewCount > 0) {
+        reviewBtn.textContent = `📝 Review (${reviewCount})`;
+        reviewBtn.classList.remove('active-review');
+    } else {
+        reviewBtn.textContent = '✓ All Mastered';
+        reviewBtn.classList.remove('active-review');
+        reviewBtn.disabled = true;
+        setTimeout(() => {
+            reviewBtn.disabled = false;
+        }, 1000);
+    }
+}
+
+// Update mastered display
+function updateMasteredDisplay() {
+    if (!masteredDisplay) return;
+    
+    const section = sections[state.currentSection];
+    if (!section) return;
+    
+    const totalPrompts = section.prompts.length;
+    const masteredCount = state.masteredPrompts.size;
+    
+    masteredDisplay.textContent = `${masteredCount}/${totalPrompts}`;
+    
+    // Change color based on progress
+    if (masteredCount === totalPrompts) {
+        masteredDisplay.style.color = '#50c878'; // Green
+    } else if (masteredCount > totalPrompts / 2) {
+        masteredDisplay.style.color = '#ffc107'; // Yellow
+    } else {
+        masteredDisplay.style.color = '#eaeaea'; // Default
+    }
 }
 
 // Initialize app when DOM is ready

@@ -265,6 +265,33 @@ header h1 {
     cursor: not-allowed;
 }
 
+.control-btn.review-btn {
+    background: rgba(138, 43, 226, 0.15);
+    border-color: rgba(138, 43, 226, 0.3);
+    color: #ba68c8;
+    font-weight: 700;
+}
+
+.control-btn.review-btn:hover {
+    background: rgba(138, 43, 226, 0.25);
+    border-color: #ba68c8;
+}
+
+.control-btn.review-btn.active-review {
+    background: rgba(138, 43, 226, 0.3);
+    border-color: #ba68c8;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(186, 104, 200, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 0 10px rgba(186, 104, 200, 0);
+    }
+}
+
 .hint-display {
     margin-top: 15px;
     padding: 15px 20px;
