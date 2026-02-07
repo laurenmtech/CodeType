@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeType - Coding Practice Typing</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>CodeType</h1>
+            <p class="tagline">Master coding concepts through typing practice</p>
+        </header>
+
+        <nav class="section-selector">
+            <button class="section-btn active" data-section="os">Operating Systems</button>
+            <button class="section-btn" data-section="algorithms">Algorithms</button>
+            <button class="section-btn" data-section="datastructures">Data Structures</button>
+            <button class="section-btn" data-section="java">Java</button>
+            <button class="section-btn" data-section="c">C</button>
+            <button class="section-btn" data-section="cpp">C++</button>
+        </nav>
+
+        <div class="stats-bar">
+            <div class="stat">
+                <span class="stat-label">WPM</span>
+                <span class="stat-value" id="wpm">0</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Accuracy</span>
+                <span class="stat-value" id="accuracy">100%</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Progress</span>
+                <span class="stat-value" id="progress">0/0</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Time</span>
+                <span class="stat-value" id="timer">0s</span>
+            </div>
+        </div>
+
+        <div class="practice-area">
+            <div class="topic-title" id="topicTitle">Loading...</div>
+            
+            <div class="text-display" id="textDisplay">
+                <span class="text-part">Loading prompt...</span>
+            </div>
+
+            <input type="text" 
+                   id="typingInput" 
+                   class="typing-input" 
+                   placeholder="Type your answer (auto-advances when correct) or press Enter/Tab ➜"
+                   autocomplete="off"
+                   autocorrect="off"
+                   autocapitalize="off"
+                   spellcheck="false">
+        </div>
+
+        <div class="controls">
+            <button id="hintBtn" class="control-btn hint-btn">💡 Hint</button>
+            <button id="newTextBtn" class="control-btn">New Prompt</button>
+            <button id="resetBtn" class="control-btn">Reset</button>
+        </div>
+
+        <div class="results" id="results" style="display: none;">
+            <h2>Practice Complete!</h2>
+            <div class="result-stats">
+                <div class="result-item">
+                    <div class="result-label">Words Per Minute</div>
+                    <div class="result-value" id="finalWpm">0</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-label">Accuracy</div>
+                    <div class="result-value" id="finalAccuracy">0%</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-label">Time Taken</div>
+                    <div class="result-value" id="finalTime">0s</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-label">Errors</div>
+                    <div class="result-value" id="finalErrors">0</div>
+                </div>
+                <div class="result-item">
+                    <div class="result-label">Hints Used</div>
+                    <div class="result-value" id="finalHints">0</div>
+                </div>
+            </div>
+            <button id="tryAgainBtn" class="control-btn primary">Try Again</button>
+        </div>
+    </div>
+
+    <script src="sections.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
