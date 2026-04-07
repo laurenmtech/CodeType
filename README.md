@@ -1,6 +1,6 @@
 # CodeType - Coding Practice Typing Website
 
-A typing practice web application focused on computer science concepts, similar to keybr but designed specifically for learning coding terminology through fill-in-the-blank exercises.
+A typing practice web application focused on computer science concepts, designed specifically for learning coding terminology through fill-in-the-blank exercises. Inspired by my need to study for exams but wanting to practice coding more. 
 
 ## Features
 
